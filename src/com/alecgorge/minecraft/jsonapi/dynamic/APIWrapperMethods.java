@@ -20,13 +20,13 @@ import java.util.logging.Logger;
 
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
-import net.minecraft.server.v1_4_5.EntityPlayer;
-import net.minecraft.server.v1_4_5.ItemInWorldManager;
-import net.minecraft.server.v1_4_5.MinecraftServer;
-import net.minecraft.server.v1_4_5.NetHandler;
-import net.minecraft.server.v1_4_5.NetServerHandler;
-import net.minecraft.server.v1_4_5.NetworkManager;
-import net.minecraft.server.v1_4_5.World;
+import net.minecraft.server.EntityPlayer;
+import net.minecraft.server.ItemInWorldManager;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.NetHandler;
+import net.minecraft.server.NetServerHandler;
+import net.minecraft.server.NetworkManager;
+import net.minecraft.server.World;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -36,15 +36,12 @@ import org.bukkit.Server;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
-import org.bukkit.craftbukkit.v1_4_5.CraftServer;
-import org.bukkit.craftbukkit.v1_4_5.CraftWorld;
-import org.bukkit.craftbukkit.v1_4_5.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_4_5.util.LazyPlayerSet;
-import org.bukkit.craftbukkit.v1_4_5.util.Waitable;
+import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -493,11 +490,11 @@ public class APIWrapperMethods implements JSONAPIMethodProvider {
 				m = new NetworkManager(ss, "???", new NetHandler() {
 
 					@Override
-					public boolean a() {
+					public boolean c() {
 						// TODO Auto-generated method stub
 						return false;
 					}
-				}, null);
+				});
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -536,7 +533,7 @@ public class APIWrapperMethods implements JSONAPIMethodProvider {
 	// https://github.com/Bukkit/CraftBukkit/blob/master/src/main/java/net/minecraft/server/NetServerHandler.java#L972
 	// private void handleCommand(String s)
 	private boolean handleCommand(String s, Player player) {
-		PlayerCommandPreprocessEvent event = new PlayerCommandPreprocessEvent(player, s, new LazyPlayerSet());
+		PlayerCommandPreprocessEvent event = new PlayerCommandPreprocessEvent(player, s);
 		Server.getPluginManager().callEvent(event);
 
 		if (event.isCancelled()) {
@@ -596,83 +593,19 @@ public class APIWrapperMethods implements JSONAPIMethodProvider {
 
 			// copied from CraftBukkit / src / main / java / net / minecraft /
 			// server / NetServerHandler.java#chat(2)
-			try {
-				Class.forName("org.bukkit.event.player.AsyncPlayerChatEvent");
+//			rockin it old school. 1.2.5/tekkit. i hate tekkit.
+            PlayerChatEvent event = new PlayerChatEvent(player, s);
+            Server.getPluginManager().callEvent(event);
 
-				AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(async, player, s, new LazyPlayerSet());
-				Server.getPluginManager().callEvent(event);
+            if (event.isCancelled()) {
+                return true;
+            }
 
-				if (PlayerChatEvent.getHandlerList().getRegisteredListeners().length != 0) {
-					// Evil plugins still listening to deprecated event
-					final PlayerChatEvent queueEvent = new PlayerChatEvent(player, event.getMessage(), event.getFormat(), event.getRecipients());
-					queueEvent.setCancelled(event.isCancelled());
-					Waitable waitable = new Waitable() {
-						@Override
-						protected Object evaluate() {
-							Bukkit.getPluginManager().callEvent(queueEvent);
-
-							if (queueEvent.isCancelled()) {
-								return null;
-							}
-
-							String message = String.format(queueEvent.getFormat(), queueEvent.getPlayer().getDisplayName(), queueEvent.getMessage());
-							minecraftServer.console.sendMessage(message);
-							if (((LazyPlayerSet) queueEvent.getRecipients()).isLazy()) {
-								for (Object player : minecraftServer.getServerConfigurationManager().players) {
-									((EntityPlayer) player).sendMessage(message);
-								}
-							} else {
-								for (Player player : queueEvent.getRecipients()) {
-									player.sendMessage(message);
-								}
-							}
-							return null;
-						}};
-					if (async) {
-						minecraftServer.processQueue.add(waitable);
-					} else {
-						waitable.run();
-					}
-					try {
-						waitable.get();
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt(); // This is proper habit for java. If we aren't handling it, pass it on!
-					} catch (java.util.concurrent.ExecutionException e) {
-						throw new RuntimeException("Exception processing chat event", e.getCause());
-					}
-				} else {
-					if (event.isCancelled()) {
-						return true;
-					}
-
-					s = String.format(event.getFormat(), event.getPlayer().getDisplayName(), event.getMessage());
-					minecraftServer.console.sendMessage(s);
-					if (((LazyPlayerSet) event.getRecipients()).isLazy()) {
-						for (Object recipient : minecraftServer.getServerConfigurationManager().players) {
-							((EntityPlayer) recipient).sendMessage(s);
-						}
-					} else {
-						for (Player recipient : event.getRecipients()) {
-							recipient.sendMessage(s);
-						}
-					}
-				}
-			}
-			catch(ClassNotFoundException e) {
-//				rockin it old school. 1.2.5/tekkit. i hate tekkit.
-                PlayerChatEvent event = new PlayerChatEvent(player, s);
-                Server.getPluginManager().callEvent(event);
-
-                if (event.isCancelled()) {
-                    return true;
-                }
-
-                s = String.format(event.getFormat(), event.getPlayer().getDisplayName(), event.getMessage());
-                minecraftServer.console.sendMessage(s);
-                for (Player recipient : event.getRecipients()) {
-                    recipient.sendMessage(s);
-                }
-			}
+            s = String.format(event.getFormat(), event.getPlayer().getDisplayName(), event.getMessage());
+            minecraftServer.console.sendMessage(s);
+            for (Player recipient : event.getRecipients()) {
+                recipient.sendMessage(s);
+            }
 			
 			
 //			 PlayerQuitEvent quitE = new PlayerQuitEvent(player, "jsonapi fauplayer quit");

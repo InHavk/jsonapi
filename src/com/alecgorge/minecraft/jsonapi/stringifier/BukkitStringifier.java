@@ -19,7 +19,6 @@ import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -192,18 +191,6 @@ public class BukkitStringifier {
 			}
 
 			o.put("enchantments", enchantments);
-			
-			if(((ItemStack) obj).getType().compareTo(Material.BOOK_AND_QUILL) == 0) {
-				JSONObject book = new JSONObject();
-				
-				BookItem bookObj = new BookItem((ItemStack) obj);
-				
-				book.put("pages", bookObj.getPages());
-				book.put("title", bookObj.getTitle());
-				book.put("author", bookObj.getAuthor());
-				
-				o.put("book", book);
-			}
 			
 			return o;
 		} else if (obj instanceof PlayerInventory) {

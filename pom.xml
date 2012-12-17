@@ -116,7 +116,7 @@
 			<artifactId>craftbukkit</artifactId>
 			<version>1956</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/deps/craftbukkit.jar</systemPath>
+			<systemPath>${project.basedir}/deps/Tekkit.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>com.drdanick.McRKit</groupId>

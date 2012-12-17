@@ -23,9 +23,9 @@ import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
-import net.minecraft.server.v1_4_5.EntityPlayer;
-import net.minecraft.server.v1_4_5.ItemInWorldManager;
-import net.minecraft.server.v1_4_5.MinecraftServer;
+import net.minecraft.server.EntityPlayer;
+import net.minecraft.server.ItemInWorldManager;
+import net.minecraft.server.MinecraftServer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -35,11 +35,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_4_5.CraftServer;
+import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -711,7 +711,7 @@ public class JSONAPI extends JavaPlugin implements JSONAPIMethodProvider {
 		}
 
 		@EventHandler
-		public void onPlayerChat(AsyncPlayerChatEvent event) {
+		public void onPlayerChat(PlayerChatEvent event) {
 			p.jsonServer.logChat(event.getPlayer().getName(), event.getMessage());
 		}
 
